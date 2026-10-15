@@ -9,6 +9,7 @@
 
 #include "hailo/hailort.h"
 #include "cache_manager.hpp"
+#include "cache_offset.hpp"
 
 #include "vdma/memory/sg_buffer.hpp"
 
@@ -151,7 +152,8 @@ hailo_status CacheManager::update_cache_offset(int32_t offset_delta_entries, boo
         return HAILO_SUCCESS;
     }
 
-    const auto new_read_offset_entries = (m_read_offset_entries + offset_delta_entries) % m_cache_length;
+    const auto new_read_offset_entries = detail::advance_cache_offset(m_read_offset_entries,
+        offset_delta_entries, m_cache_length);
 
     for (auto &core : m_core_op_managers) {
         auto status = core.second.update_cache_offset(new_read_offset_entries, m_read_offset_entries,
